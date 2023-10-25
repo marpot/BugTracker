@@ -1,6 +1,7 @@
 from flask import Flask, render_template, redirect, url_for, request
 from flask import Blueprint
 from blueprints import bug_blueprint
+from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 #app.register_blueprint(bug_blueprint)   coś tu jest nie tak
