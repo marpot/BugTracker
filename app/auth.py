@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template
+from . import app
 ...
 @auth.route('/login')
 def login():
