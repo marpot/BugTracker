@@ -1,3 +1,1 @@
-# BugTracker
-
-It will be Bug_tracker in flask and python
+Bug_Tracker project in Flask
