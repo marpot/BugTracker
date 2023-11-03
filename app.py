@@ -23,6 +23,9 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 class User(UserMixin, db.Model):
+    __tablename__ = 'user'
+    __table_args__ = {'extend_existing': True}
+
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     password_hash = db.Column(db.String(128), nullable=False)
@@ -46,10 +49,14 @@ class LoginForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])
 
 class RegistrationForm(FlaskForm):
-    new_username = StringField('Username', validators=[DataRequired()])
-    new_password = PasswordField('Password', validators=[DataRequired()])
+    username = StringField('Username', validators=[DataRequired()])
+    password = PasswordField('Password', validators=[DataRequired()])
     role = SelectField('Role', choices=[('User', 'User'), ('Admin', 'Admin')], validators=[DataRequired()])
     submit = SubmitField('Create Account')
+
+class ProjectForm(FlaskForm):
+    name = StringField('Project Name', validators=[DataRequired()])
+    submit = SubmitField('Create Project')
 
 class BugForm(FlaskForm):
     description = TextAreaField('Bug Description', validators=[DataRequired()])
@@ -72,7 +79,7 @@ def login():
             login_user(user)
             flash('Zalogowano pomyślnie', 'success')
             next_page = request.args.get('next')
-            return redirect(next_page or url_for('dashboard'))  # Przekieruj do panelu użytkownika
+            return redirect(next_page or url_for('dashboard'))
         else:
             flash('Nieprawidłowa nazwa użytkownika lub hasło', 'danger')
 
@@ -82,13 +89,13 @@ def login():
 def register():
     form = RegistrationForm()
     if form.validate_on_submit():
-        hashed_password = bcrypt.generate_password_hash(form.new_password.data).decode('utf-8')
-        user = User(username=form.new_username.data, password_hash=hashed_password, role=form.role.data)
+        hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
+        user = User(username=form.username.data, password_hash=hashed_password, role=form.role.data)
         db.session.add(user)
         db.session.commit()
-        login_user(user)  # Zaloguj użytkownika po rejestracji
+        login_user(user)
         flash('Account created successfully. Please log in.', 'success')
-        return redirect(url_for('dashboard'))  # Przekieruj na stronę panelu użytkownika
+        return redirect(url_for('dashboard'))
     return render_template('register.html', form=form)
 
 @app.route('/add_project', methods=['GET', 'POST'])
@@ -113,24 +120,22 @@ def logout():
 @login_required
 def add_bug():
     form = BugForm()
+    form.project.choices = [(project.id, project.name) for project in Project.query.all()]
+    
     if form.validate_on_submit():
         description = form.description.data
-        project_name = form.project.data
-        project = Project.query.filter_by(name=project_name).first()
+        project_id = form.project.data
+        project = Project.query.get(project_id)
 
         if project:
-            # Pobierz zalogowanego użytkownika (user) z bazy danych
             user = User.query.get(current_user.id)
-
-            # Utwórz nowy błąd
             new_bug = Bug(description=description, project=project, user=user)
             db.session.add(new_bug)
             db.session.commit()
-
             flash('Błąd został dodany pomyślnie', 'success')
             return redirect(url_for('dashboard'))
         else:
-            flash('Nie znaleziono projektu o takiej nazwie', 'danger')
+            flash('Nie znaleziono projektu o takim ID', 'danger')
 
     return render_template('add_bug.html', form=form)
 
@@ -141,13 +146,13 @@ def edit_bug(bug_id):
 
     if bug:
         form = BugForm()
+        form.project.choices = [(project.id, project.name) for project in Project.query.all()]
         if form.validate_on_submit():
             description = form.description.data
-            project_name = form.project.data
-            project = Project.query.filter_by(name=project_name).first()
+            project_id = form.project.data
+            project = Project.query.get(project_id)
 
             if project:
-                # Aktualizuj dane błędu
                 bug.description = description
                 bug.project = project
                 db.session.commit()
@@ -155,11 +160,10 @@ def edit_bug(bug_id):
                 flash('Błąd został zaktualizowany pomyślnie', 'success')
                 return redirect(url_for('dashboard'))
             else:
-                flash('Nie znaleziono projektu o takiej nazwie', 'danger')
-        
-        # Wypełnij formularz danymi błędu do edycji
+                flash('Nie znaleziono projektu o takim ID', 'danger')
+
         form.description.data = bug.description
-        form.project.data = bug.project.name
+        form.project.data = bug.project.id
 
         return render_template('edit_bug.html', form=form, bug=bug)
     else:
@@ -169,12 +173,10 @@ def edit_bug(bug_id):
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    # Pobierz błędy przypisane do zalogowanego użytkownika
     user_id = current_user.id
     user_bugs = Bug.query.filter_by(user_id=user_id).all()
 
     return render_template('dashboard.html', user_bugs=user_bugs)
-
 
 if __name__ == '__main__':
     app.run(debug=True)
