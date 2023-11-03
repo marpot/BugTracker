@@ -1,12 +1,13 @@
-from flask import Flask, render_template, flash, redirect, url_for, request
+from flask import Flask, render_template, flash, redirect, url_for, request, abort
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SelectField, SubmitField, TextAreaField
-from wtforms.validators import DataRequired, EqualTo, Length
+from wtforms.validators import DataRequired
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_migrate import Migrate
 from flask_bcrypt import Bcrypt
+from datetime import datetime
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///bugtracker.db'
@@ -24,15 +25,6 @@ login_manager.login_view = "login"
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-class User(UserMixin, db.Model):
-    __tablename__ = 'user'
-    __table_args__ = {'extend_existing': True}
-
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True, nullable=False)
-    password_hash = db.Column(db.String(128), nullable=False)
-    role = db.Column(db.String(20), nullable=False)
-
 class Project(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=True, nullable=False)
@@ -46,6 +38,37 @@ class Bug(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     status = db.Column(db.String(20), default='Open')
 
+class BugLog(db.Model):
+    __tablename__ = 'bug_log'
+    id = db.Column(db.Integer, primary_key=True)
+    bug_id = db.Column(db.Integer, db.ForeignKey('bug.id'), nullable=False)
+    status = db.Column(db.String(20), nullable=False)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+class ProjectForm(FlaskForm):
+    name = StringField('Project Name', validators=[DataRequired()])
+    submit = SubmitField('Create Project')
+
+class User(UserMixin, db.Model):
+    __tablename__ = 'user'
+    __table_args__ = {'extend_existing': True}
+
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    password_hash = db.Column(db.String(128), nullable=False)
+    role = db.Column(db.String(20), nullable=False)
+
+    projects = db.relationship('Project', backref='user', lazy=True)
+    bugs = db.relationship('Bug', backref='user', lazy=True)
+
+# Dodanie użytkownika "admin" do bazy danych
+with app.app_context():
+    admin = User.query.filter_by(username='admin').first()
+    if admin is None:
+        admin = User(username='admin', password_hash=bcrypt.generate_password_hash('321meme321').decode('utf-8'), role='Admin')
+        db.session.add(admin)
+        db.session.commit()
+
 class LoginForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
@@ -56,13 +79,10 @@ class RegistrationForm(FlaskForm):
     role = SelectField('Role', choices=[('User', 'User'), ('Admin', 'Admin')], validators=[DataRequired()])
     submit = SubmitField('Create Account')
 
-class ProjectForm(FlaskForm):
-    name = StringField('Project Name', validators=[DataRequired()])
-    submit = SubmitField('Create Project')
-
 class BugForm(FlaskForm):
     description = TextAreaField('Bug Description', validators=[DataRequired()])
     project = SelectField('Project', coerce=int)
+    status = SelectField('Status', choices=[('Open', 'Open'), ('Closed', 'Closed')], validators=[DataRequired()])
     submit = SubmitField('Add Bug')
 
 @app.route('/')
@@ -91,14 +111,12 @@ def login():
 def register():
     form = RegistrationForm()
     if form.validate_on_submit():
-        # Wygenerowanie hasha dla hasłas
         hashed_password = bcrypt.generate_password_hash(form.new_password.data).decode('utf-8')
 
-        # Sprawdzenie, czy użytkownik o danej nazwie użytkownika już istnieje
         existing_user = User.query.filter_by(username=form.new_username.data).first()
         if existing_user is None:
-            # Tworzenie nowego użytkownika i zapis do bazy danych
             user = User(username=form.new_username.data, password_hash=hashed_password, role=form.role.data)
+
             db.session.add(user)
             db.session.commit()
 
@@ -111,7 +129,6 @@ def register():
             flash('Username already exists. Please choose a different username.', 'danger')
 
     return render_template('register.html', form=form)
-
 
 @app.route('/add_project', methods=['GET', 'POST'])
 @login_required
@@ -144,7 +161,7 @@ def add_bug():
 
         if project:
             user = User.query.get(current_user.id)
-            new_bug = Bug(description=description, project=project, user=user)
+            new_bug = Bug(description=description, project=project, user=user, status=form.status.data)
             db.session.add(new_bug)
             db.session.commit()
             flash('Błąd został dodany pomyślnie', 'success')
@@ -170,6 +187,7 @@ def edit_bug(bug_id):
             if project:
                 bug.description = description
                 bug.project = project
+                bug.status = form.status.data
                 db.session.commit()
 
                 flash('Błąd został zaktualizowany pomyślnie', 'success')
@@ -179,6 +197,7 @@ def edit_bug(bug_id):
 
         form.description.data = bug.description
         form.project.data = bug.project.id
+        form.status.data = bug.status
 
         return render_template('edit_bug.html', form=form, bug=bug)
     else:
@@ -192,6 +211,24 @@ def dashboard():
     user_bugs = Bug.query.filter_by(user_id=user_id).all()
 
     return render_template('dashboard.html', user_bugs=user_bugs)
+
+@app.route('/admin/projects')
+@login_required
+def admin_projects():
+    if current_user.role != 'Admin':
+        abort(403)  # Odmowa dostępu dla nieadministratorów
+    
+    # Tutaj umieść kod wyświetlający projekty lub umożliwiający zarządzanie nimi
+    return render_template('admin/projects.html')
+
+@app.route('/admin/users')
+@login_required
+def admin_users():
+    if current_user.role != 'Admin':
+        abort(403)  # Odmowa dostępu dla nieadministratorów
+    
+    # Tutaj umieść kod wyświetlający użytkowników lub umożliwiający zarządzanie nimi
+    return render_template('admin/users.html')
 
 if __name__ == '__main__':
     app.run(debug=True)

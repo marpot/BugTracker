@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Zarządzaj projektami</title>
+</head>
+<body>
+    <h1>Zarządzaj projektami</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nazwa Projektu</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for project in projects %}
+                <tr>
+                    <td>{{ project.id }}</td>
+                    <td>{{ project.name }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="{{ url_for('dashboard') }}">Wróć do panelu użytkownika</a>
+</body>
+</html>
