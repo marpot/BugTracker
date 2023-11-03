@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Panel użytkownika</title>
+    <!-- Dodaj tutaj dowolne dodatkowe style lub skrypty, jeśli są potrzebne -->
+</head>
+<body>
+    <div class="container">
+        <h1>Panel użytkownika</h1>
+        <h2>Twoje błędy:</h2>
+        <ul>
+            {% for bug in user_bugs %}
+                <li>
+                    <strong>Opis błędu:</strong> {{ bug.description }}<br>
+                    <strong>Projekt:</strong> {{ bug.project.name }}<br>
+                    <strong>Status:</strong> {{ bug.status }}<br>
+                    <hr>
+                </li>
+            {% endfor %}
+        </ul>
+        <a href="{{ url_for('add_bug') }}" class="btn btn-primary">Dodaj nowy błąd</a>
+        <a href="{{ url_for('logout') }}" class="btn btn-secondary">Wyloguj się</a>
+    </div>
+</body>
+</html>

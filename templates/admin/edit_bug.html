@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Bug - Bug Tracker</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6 offset-md-3">
+                <h1 class="text-center">Edit Bug</h1>
+                <form method="POST" action="/admin/bugs/edit/{{ bug.id }}">
+                    {{ form.hidden_tag() }}
+                    <div class="form-group">
+                        {{ form.description.label(for="description") }}
+                        {{ form.description(class="form-control", id="description") }}
+                    </div>
+                    <div class="form-group">
+                        {{ form.project.label(for="project") }}
+                        {{ form.project(class="form-control", id="project") }}
+                    </div>
+                    <div class="form-group">
+                        {{ form.status.label(for="status") }}
+                        {{ form.status(class="form-control", id="status") }}
+                    </div>
+                    <button type="submit" class="btn btn-primary">{{ form.submit.label }}</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

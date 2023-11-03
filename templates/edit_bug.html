@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edytuj Błąd</title>
+</head>
+<body>
+    <h1>Edytuj Błąd</h1>
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        <div>
+            <label for="project">Projekt:</label>
+            {{ form.project.label }}
+            {{ form.project(class="form-control") }}
+        </div>
+        <div>
+            <label for="description">Opis Błędu:</label>
+            {{ form.description.label }}
+            {{ form.description(class="form-control") }}
+        </div>
+        <div>
+            {{ form.submit(class="btn btn-primary") }}
+        </div>
+    </form>
+</body>
+</html>

@@ -1,0 +1,45 @@
+/* Stylizacja głównego nagłówka */
+h1 {
+  font-size: 24px;
+  color: #333;
+}
+
+/* Stylizacja przycisków */
+input[type="submit"] {
+  background-color: #007BFF;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
+}
+
+/* Stylizacja linków */
+a {
+  text-decoration: none;
+  color: #007BFF;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Stylizacja formularza logowania i rejestracji */
+form {
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+/* Stylizacja listy projektów */
+ul {
+  list-style-type: square;
+}
+
+/* Stylizacja błędów */
+.error {
+  color: red;
+}
+
+/* Stylizacja sukcesu */
+.success {
+  color: green;
+}
