@@ -2,7 +2,7 @@ from flask import Flask, render_template, flash, redirect, url_for, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SelectField, TextAreaField, SubmitField
+from wtforms import StringField, PasswordField, SelectField, SubmitField, TextAreaField
 from wtforms.validators import DataRequired, EqualTo, Length
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_migrate import Migrate
@@ -12,9 +12,11 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///bugtracker.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = '321meme321'
+
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
 migrate = Migrate(app, db)
+
 login_manager = LoginManager(app)
 login_manager.login_view = "login"
 
@@ -49,8 +51,8 @@ class LoginForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])
 
 class RegistrationForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired()])
-    password = PasswordField('Password', validators=[DataRequired()])
+    new_username = StringField('Username', validators=[DataRequired()])
+    new_password = PasswordField('Password', validators=[DataRequired()])
     role = SelectField('Role', choices=[('User', 'User'), ('Admin', 'Admin')], validators=[DataRequired()])
     submit = SubmitField('Create Account')
 
@@ -75,7 +77,7 @@ def login():
         password = form.password.data
 
         user = User.query.filter_by(username=username).first()
-        if user and check_password_hash(user.password_hash, password):
+        if user and bcrypt.check_password_hash(user.password_hash, password):
             login_user(user)
             flash('Zalogowano pomyślnie', 'success')
             next_page = request.args.get('next')
@@ -89,14 +91,27 @@ def login():
 def register():
     form = RegistrationForm()
     if form.validate_on_submit():
-        hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
-        user = User(username=form.username.data, password_hash=hashed_password, role=form.role.data)
-        db.session.add(user)
-        db.session.commit()
-        login_user(user)
-        flash('Account created successfully. Please log in.', 'success')
-        return redirect(url_for('dashboard'))
+        # Wygenerowanie hasha dla hasłas
+        hashed_password = bcrypt.generate_password_hash(form.new_password.data).decode('utf-8')
+
+        # Sprawdzenie, czy użytkownik o danej nazwie użytkownika już istnieje
+        existing_user = User.query.filter_by(username=form.new_username.data).first()
+        if existing_user is None:
+            # Tworzenie nowego użytkownika i zapis do bazy danych
+            user = User(username=form.new_username.data, password_hash=hashed_password, role=form.role.data)
+            db.session.add(user)
+            db.session.commit()
+
+            # Logowanie nowego użytkownika po rejestracji
+            login_user(user)
+
+            flash('Account created successfully. Please log in.', 'success')
+            return redirect(url_for('login'))
+        else:
+            flash('Username already exists. Please choose a different username.', 'danger')
+
     return render_template('register.html', form=form)
+
 
 @app.route('/add_project', methods=['GET', 'POST'])
 @login_required
