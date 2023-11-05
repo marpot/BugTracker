@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Panel Administratora</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin_styles.css') }}">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="{{ url_for('admin') }}">Panel Administratora</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('dashboard') }}">Wróć do panelu użytkownika</a>
+                </li>
+            </ul>
+        </div>
+    </nav>    
+
+    <div class="container mt-4 text-center">
+        <h1>Witaj, {{ current_user.username }}! Jesteś teraz zalogowany jako Administrator.</h1>
+
+        <div class="row mt-4">
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h2>Zarządzaj projektami</h2>
+                            <a class="btn btn-primary" href="{{ url_for('admin_projects') }}">Przeglądaj projekty</a>
+                            <a class="btn btn-primary" href="{{ url_for('admin_add_project') }}">Dodaj projekt</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h2>Zarządzaj użytkownikami</h2>
+                            <a class="btn btn-primary" href="{{ url_for('admin_users') }}">Przeglądaj użytkowników</a>
+                            <a class="btn btn-primary" href="{{ url_for('register') }}">Dodaj nowego użytkownika</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+</body>
+</html>

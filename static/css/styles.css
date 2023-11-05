@@ -1,19 +1,31 @@
-/* Stylizacja głównego nagłówka */
+/* Stylizacja głównego nagłówka w panelu administratora */
 h1 {
-  font-size: 24px;
-  color: #333;
+  font-size: 28px; /* Trochę większa czcionka dla nagłówka */
+  color: #007BFF; /* Kolor niebieski dla nagłówka */
+  text-align: center; /* Wyjustowany do środka */
+  margin: 20px 0; /* Dodaj odstęp góra/dół */
 }
 
-/* Stylizacja przycisków */
+/* Stylizacja podnagłówków w panelu administratora */
+h2 {
+  font-size: 24px; /* Rozmiar czcionki dla podnagłówków */
+  color: #333; /* Kolor czcionki czarny */
+  text-align: center; /* Wyjustowany do środka */
+  margin: 20px 0; /* Dodaj odstęp góra/dół */
+}
+
+/* Stylizacja przycisków w panelu administratora */
 input[type="submit"] {
   background-color: #007BFF;
   color: white;
   padding: 10px 20px;
   border: none;
   cursor: pointer;
+  display: block; /* Blokowy element przycisku */
+  margin: 10px auto; /* Wycentrowanie przycisku */
 }
 
-/* Stylizacja linków */
+/* Stylizacja linków w panelu administratora */
 a {
   text-decoration: none;
   color: #007BFF;
@@ -23,23 +35,21 @@ a:hover {
   text-decoration: underline;
 }
 
-/* Stylizacja formularza logowania i rejestracji */
-form {
-  max-width: 300px;
-  margin: 0 auto;
-}
-
-/* Stylizacja listy projektów */
+/* Stylizacja listy projektów w panelu administratora */
 ul {
   list-style-type: square;
+  text-align: center; /* Wyjustowany do środka */
+  margin: 20px auto; /* Wycentrowanie listy */
 }
 
-/* Stylizacja błędów */
+/* Stylizacja błędów w panelu administratora */
 .error {
   color: red;
+  text-align: center; /* Wyjustowany do środka */
 }
 
-/* Stylizacja sukcesu */
+/* Stylizacja sukcesu w panelu administratora */
 .success {
   color: green;
+  text-align: center; /* Wyjustowany do środka */
 }

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Panel użytkownika</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #007bff;
+        }
+
+        h2 {
+            color: #333;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        li {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin: 10px 0;
+        }
+
+        strong {
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            color: #fff;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Panel użytkownika</h1>
+        <h2>Twoje błędy:</h2>
+        <ul>
+            {% for bug in user_bugs %}
+                <li>
+                    <strong>Opis błędu:</strong> {{ bug.description }}<br>
+                    <strong>Projekt:</strong> {{ bug.project.name }}<br>
+                    <strong>Status:</strong> {{ bug.status }}<br>
+                    <hr>
+                </li>
+            {% endfor %}
+        </ul>
+        <a href="{{ url_for('add_bug') }}" class="btn btn-primary">Dodaj nowy błąd</a>
+        <a href="{{ url_for('logout') }}" class="btn btn-secondary">Wyloguj się</a>
+    </div>
+</body>
+</html>

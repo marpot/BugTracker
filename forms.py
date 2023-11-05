@@ -16,3 +16,7 @@ class BugForm(FlaskForm):
     description = TextAreaField('Bug Description', validators=[DataRequired()])
     project = StringField('Project', validators=[DataRequired()])
     submit = SubmitField('Add Bug')
+
+class ProjectForm(FlaskForm):
+    name = StringField('Project Name', validators=[DataRequired()])
+    submit = SubmitField('Create Project')
