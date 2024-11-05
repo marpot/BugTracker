@@ -1,5 +1,3 @@
-Oto przykładowa dokumentacja projektu, która może pomóc w zrozumieniu i zarządzaniu projektem BugTracker:
-
 # Dokumentacja projektu BugTracker
 
 ## Spis treści
